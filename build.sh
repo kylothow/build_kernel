@@ -201,7 +201,7 @@ FUNC_BUILD_ZIP()
 
   cd $BUILD_ZIP_DIR;
   zip -r9 $ZIP_PATH * \
-      -x .git* README.md patch/\* ramdisk/\* *.placeholder;
+      -x .git* README.md patch/\* *.placeholder;
   cd $BUILD_KERNEL_DIR;
 }
 
