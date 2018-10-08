@@ -15,7 +15,7 @@
 
 # # # INIT # # #
 tput reset;
-cd ../oneplus5;
+cd ../android_kernel_oneplus_msm8998;
 
 
 # # # SET KERNEL ID # # #
@@ -36,12 +36,12 @@ USE_CCACHE=true;
 
 CROSS_COMPILE_HAS_GIT=true;
 CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9;
-CROSS_COMPILE_BRANCH=android-framework.lnx.2.9.2.r1-rel;
+CROSS_COMPILE_BRANCH=aosp-new/master;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
-ZIP_DIR_BRANCH=android-8.1;
+ZIP_DIR_BRANCH=android-9.0;
 
-ZIP_NAME=$PRODUCT_NAME-OP5-OOS-$BUILD_TIMESTAMP-$PRODUCT_REVISION.zip
+ZIP_NAME=$PRODUCT_NAME-OP5-AOSP-$BUILD_TIMESTAMP-$PRODUCT_REVISION.zip
 
 
 # # # SET LOCAL VARIABLES # # #
@@ -57,8 +57,7 @@ BUILD_CROSS_COMPILE=/home/kylothow/android/source/CodeAurora/$CROSS_COMPILE_NAME
 KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
 
 KERNEL_IMG=$BUILD_ZIP_DIR/Image.gz-dtb;
-KERNEL_MODULES=$BUILD_ZIP_DIR/modules/system/lib/modules;
-VENDOR_MODULES=$BUILD_ZIP_DIR/modules/vendor/lib/modules;
+KERNEL_MODULES=$BUILD_ZIP_DIR/modules/vendor/lib/modules;
 
 BUILD_JOB_NUMBER=$(nproc --all);
 HOST_ARCH=$(uname -m);
@@ -123,7 +122,6 @@ FUNC_CLEAN()
   rm -rf $BUILD_KERNEL_OUT_DIR;
   rm -f $KERNEL_IMG;
   rm -f $KERNEL_MODULES/*.ko;
-  rm -f $VENDOR_MODULES/*.ko;
   rm -f $BUILD_ZIP_DIR/version;
   rm -f $PRODUCT_OUT/*.zip;
 }
@@ -179,14 +177,6 @@ FUNC_COPY_MODULES()
   find $BUILD_KERNEL_OUT_DIR \
       -name "*.ko" \
       -exec cp -v {} $KERNEL_MODULES \;
-
-  if [ ! -d "$VENDOR_MODULES" ]; then
-    mkdir -p $VENDOR_MODULES;
-  fi;
-
-  mv -v $KERNEL_MODULES/wlan.ko $KERNEL_MODULES/qca_cld3_wlan.ko;
-  cp -v $KERNEL_MODULES/qca_cld3_wlan.ko $VENDOR_MODULES/qca_cld3_wlan.ko;
-
   echo "";
 }
 
@@ -199,7 +189,7 @@ FUNC_BUILD_ZIP()
 
   cd $BUILD_ZIP_DIR;
   zip -r9 $ZIP_PATH * \
-      -x .git* README.md patch/\* *.placeholder;
+      -x .git* README.md patch/\* ramdisk/\* *.placeholder;
   cd $BUILD_KERNEL_DIR;
 }
 
