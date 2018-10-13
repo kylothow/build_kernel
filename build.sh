@@ -36,7 +36,7 @@ USE_CCACHE=true;
 
 CROSS_COMPILE_HAS_GIT=true;
 CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9;
-CROSS_COMPILE_BRANCH=android-framework.lnx.2.9.2.r1-rel;
+CROSS_COMPILE_BRANCH=aosp-new/master;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
 ZIP_DIR_BRANCH=android-8.1;
