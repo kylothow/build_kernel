@@ -23,8 +23,8 @@ cd ../android_kernel_oneplus_msm8998;
 PRODUCT_REVISION=$(git rev-parse HEAD | cut -c -8);
 BUILD_TIMESTAMP=$(date '+%Y%m%d_%H%M');
 
-PRODUCT_NAME=OpenEngine;
-PRODUCT_DEVICE=oneplus5;
+PRODUCT_NAME=SultanXtended;
+PRODUCT_DEVICE=dumpling;
 
 
 # # # SET TOOLS PARAMETERS # # #
@@ -39,9 +39,9 @@ CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/l
 CROSS_COMPILE_BRANCH=aosp-new/master;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
-ZIP_DIR_BRANCH=android-9.0;
+ZIP_DIR_BRANCH=SultanXtended;
 
-ZIP_NAME=$PRODUCT_NAME-OP5-AOSP-$BUILD_TIMESTAMP-$PRODUCT_REVISION.zip
+ZIP_NAME=$PRODUCT_NAME-dumpling-AOSP-$BUILD_TIMESTAMP-$PRODUCT_REVISION.zip
 
 
 # # # SET LOCAL VARIABLES # # #
@@ -71,7 +71,7 @@ if [ "$HOST_ARCH" == "x86_64" ]; then
   export CROSS_COMPILE=$BUILD_CROSS_COMPILE/bin/$CROSS_COMPILE_SUFFIX;
 fi;
 
-export LOCALVERSION=~$PRODUCT_NAME-$PRODUCT_REVISION;
+export LOCALVERSION=-$PRODUCT_REVISION;
 
 
 # # # VERIFY PRODUCT OUTPUT FOLDER EXISTENCE # # #
@@ -189,7 +189,7 @@ FUNC_BUILD_ZIP()
 
   cd $BUILD_ZIP_DIR;
   zip -r9 $ZIP_PATH * \
-      -x .git* README.md patch/\* ramdisk/\* *.placeholder;
+      -x .git* README.md modules/\* patch/\* ramdisk/\* *.placeholder;
   cd $BUILD_KERNEL_DIR;
 }
 
