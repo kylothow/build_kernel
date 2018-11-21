@@ -20,10 +20,10 @@ cd ../android_kernel_oneplus_msm8998;
 
 # # # SET KERNEL ID # # #
 
-PRODUCT_REVISION=$(git rev-parse HEAD | cut -c -8);
-BUILD_TIMESTAMP=$(date '+%Y%m%d_%H%M');
+PRODUCT_REVISION=$(git rev-parse HEAD | cut -c -7);
+BUILD_TIMESTAMP=$(date '+%Y%m%d');
 
-PRODUCT_NAME=OpenEngine;
+PRODUCT_NAME=DarkDescent;
 PRODUCT_DEVICE=oneplus5;
 
 
@@ -41,7 +41,7 @@ CROSS_COMPILE_BRANCH=aosp-new/master;
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
 ZIP_DIR_BRANCH=android-9.0;
 
-ZIP_NAME=$PRODUCT_NAME-OP5-AOSP-$BUILD_TIMESTAMP-$PRODUCT_REVISION.zip
+ZIP_NAME=$PRODUCT_NAME-$BUILD_TIMESTAMP-$PRODUCT_REVISION-oneplus5.zip
 
 
 # # # SET LOCAL VARIABLES # # #
@@ -169,7 +169,7 @@ FUNC_COPY_KERNEL()
   SUBLEVEL=$(grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE)
   LINUX_VERSION=$VERSION.$PATCHLEVEL.$SUBLEVEL;
 
-  echo "Version: $LINUX_VERSION~$PRODUCT_NAME-$BUILD_TIMESTAMP-$PRODUCT_REVISION" > $BUILD_ZIP_DIR/version;
+  echo "Version: $LINUX_VERSION-perf~$PRODUCT_NAME-$BUILD_TIMESTAMP-$PRODUCT_REVISION" > $BUILD_ZIP_DIR/version;
 }
 
 FUNC_COPY_MODULES()
