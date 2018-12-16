@@ -39,7 +39,7 @@ CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/l
 CROSS_COMPILE_BRANCH=aosp-new/master;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
-ZIP_DIR_BRANCH=android-8.1;
+ZIP_DIR_BRANCH=oos;
 
 ZIP_NAME=$PRODUCT_NAME-$BUILD_TIMESTAMP-$PRODUCT_REVISION-oneplus5.zip
 
