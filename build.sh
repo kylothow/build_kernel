@@ -154,7 +154,7 @@ FUNC_STRIP_MODULES()
 {
   find $BUILD_KERNEL_OUT_DIR \
       -name "*.ko" \
-      -exec ${CROSS_COMPILE}strip --strip-debug {} \;
+      -exec ${CROSS_COMPILE}strip --strip-debug --strip-unneeded {} \;
 }
 
 
