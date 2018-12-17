@@ -158,6 +158,18 @@ FUNC_STRIP_MODULES()
 }
 
 
+# # # SIGN MODULES # # #
+
+FUNC_SIGN_MODULES()
+{
+  find $BUILD_KERNEL_OUT_DIR \
+      -name "*.ko" \
+      -exec $BUILD_KERNEL_OUT_DIR/scripts/sign-file sha512 \
+            $BUILD_KERNEL_OUT_DIR/certs/signing_key.pem \
+            $BUILD_KERNEL_OUT_DIR/certs/signing_key.x509 {} \;
+}
+
+
 # # # COPY BUILD OUTPUT # # #
 
 FUNC_COPY_KERNEL()
@@ -217,6 +229,7 @@ rm -f $PRODUCT_OUT/build.log;
   FUNC_BUILD;
   FUNC_COPY_KERNEL;
   FUNC_STRIP_MODULES;
+  FUNC_SIGN_MODULES;
   FUNC_COPY_MODULES;
   FUNC_BUILD_ZIP;
 ) 2>&1 | tee $PRODUCT_OUT/build.log;
