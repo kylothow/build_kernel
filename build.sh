@@ -54,7 +54,11 @@ BUILD_KERNEL_OUT_DIR=$PRODUCT_OUT/KERNEL_OBJ;
 BUILD_ZIP_DIR=$PRODUCT_OUT/AnyKernel2;
 
 BUILD_CROSS_COMPILE=/home/kylothow/android/source/CodeAurora/$CROSS_COMPILE_NAME;
-KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
+if [ -f "$BUILD_KERNEL_DIR/arch/arm64/configs/${PRODUCT_DEVICE}_defconfig" ]; then
+  KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
+else
+  KERNEL_DEFCONFIG=msmcortex-perf_defconfig;
+fi;
 
 KERNEL_IMG=$BUILD_ZIP_DIR/Image.gz-dtb;
 KERNEL_MODULES=$BUILD_ZIP_DIR/modules/system/lib/modules;
