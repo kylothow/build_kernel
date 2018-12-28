@@ -223,6 +223,10 @@ FUNC_BUILD_ZIP()
   zip -r9 $ZIP_PATH * \
       -x .git* README.md patch/\* ramdisk/\* *.placeholder;
   cd $BUILD_KERNEL_DIR;
+
+  echo "";
+  echo "out: $ZIP_NAME";
+  echo "";
 }
 
 
