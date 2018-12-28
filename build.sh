@@ -200,8 +200,10 @@ FUNC_COPY_MODULES()
     mkdir -p $VENDOR_MODULES;
   fi;
 
-  mv -v $KERNEL_MODULES/wlan.ko $KERNEL_MODULES/qca_cld3_wlan.ko;
-  cp -v $KERNEL_MODULES/qca_cld3_wlan.ko $VENDOR_MODULES/qca_cld3_wlan.ko;
+  if [ -f "$KERNEL_MODULES/wlan.ko" ]; then
+    mv -v $KERNEL_MODULES/wlan.ko $KERNEL_MODULES/qca_cld3_wlan.ko;
+    cp -v $KERNEL_MODULES/qca_cld3_wlan.ko $VENDOR_MODULES/qca_cld3_wlan.ko;
+  fi;
   if [ -f "$KERNEL_MODULES/msm_11ad_proxy.ko" ] && [ -f "$KERNEL_MODULES/wil6210.ko" ]; then
     cp -v $KERNEL_MODULES/msm_11ad_proxy.ko $VENDOR_MODULES/msm_11ad_proxy.ko;
     cp -v $KERNEL_MODULES/wil6210.ko $VENDOR_MODULES/wil6210.ko;
