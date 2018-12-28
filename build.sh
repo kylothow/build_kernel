@@ -198,6 +198,8 @@ FUNC_COPY_MODULES()
 
   mv -v $KERNEL_MODULES/wlan.ko $KERNEL_MODULES/qca_cld3_wlan.ko;
   cp -v $KERNEL_MODULES/qca_cld3_wlan.ko $VENDOR_MODULES/qca_cld3_wlan.ko;
+  cp -v $KERNEL_MODULES/msm_11ad_proxy.ko $VENDOR_MODULES/msm_11ad_proxy.ko;
+  cp -v $KERNEL_MODULES/wil6210.ko $VENDOR_MODULES/wil6210.ko;
 
   echo "";
 }
