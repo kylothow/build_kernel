@@ -34,9 +34,9 @@ CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
 
 USE_CCACHE=true;
 
-CROSS_COMPILE_HAS_GIT=true;
-CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9;
-CROSS_COMPILE_BRANCH=aosp-new/master;
+CROSS_COMPILE_HAS_GIT=false;
+#CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9;
+#CROSS_COMPILE_BRANCH=aosp-new/master;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
 ZIP_DIR_BRANCH=oos;
@@ -53,7 +53,7 @@ PRODUCT_OUT=$BUILD_ROOT_DIR/${BUILD_KERNEL_DIR_NAME}_out;
 BUILD_KERNEL_OUT_DIR=$PRODUCT_OUT/KERNEL_OBJ;
 BUILD_ZIP_DIR=$PRODUCT_OUT/AnyKernel2;
 
-BUILD_CROSS_COMPILE=/home/kylothow/android/source/CodeAurora/$CROSS_COMPILE_NAME;
+BUILD_CROSS_COMPILE=/home/kylothow/android/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
 if [ -f "$BUILD_KERNEL_DIR/arch/arm64/configs/${PRODUCT_DEVICE}_defconfig" ]; then
   KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
 else
