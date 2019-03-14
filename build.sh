@@ -23,7 +23,7 @@ cd ../oneplus5;
 PRODUCT_REVISION=$(git rev-parse HEAD | cut -c -7);
 BUILD_TIMESTAMP=$(date '+%Y%m%d');
 
-PRODUCT_NAME=DarkDescent;
+PRODUCT_NAME=BlackPegasus;
 PRODUCT_DEVICE=oneplus5;
 
 
