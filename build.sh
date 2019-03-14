@@ -39,7 +39,7 @@ CROSS_COMPILE_HAS_GIT=false;
 #CROSS_COMPILE_BRANCH=aosp-new/master;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
-ZIP_DIR_BRANCH=oos;
+ZIP_DIR_BRANCH=p9x-caf;
 
 ZIP_NAME=$PRODUCT_NAME-oneplus5-$BUILD_TIMESTAMP-$PRODUCT_REVISION.zip
 
