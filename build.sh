@@ -36,7 +36,7 @@ USE_CCACHE=true;
 
 CROSS_COMPILE_HAS_GIT=true;
 CROSS_COMPILE_GIT=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9;
-CROSS_COMPILE_BRANCH=aosp-new/master;
+CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
 
 ZIP_DIR_GIT=https://github.com/kylothow/AnyKernel2.git;
 ZIP_DIR_BRANCH=oos;
