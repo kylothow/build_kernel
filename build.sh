@@ -15,7 +15,7 @@
 
 # # # INIT # # #
 tput reset;
-cd ../oneplus5;
+cd ../oneplus5 || exit 1;
 
 
 # # # SET KERNEL ID # # #
