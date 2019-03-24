@@ -21,6 +21,12 @@ PRODUCT_DEVICE=oneplus5;
 PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
 
 
+# # # SCRIPT INIT # # #
+
+tput reset;
+cd ../$PRODUCT_DEVICE || cd ../*$PRODUCT_DEVICE_ALIAS || exit 1;
+
+
 # # # SET TOOLS PARAMETERS # # #
 
 USE_CCACHE=true;
@@ -37,12 +43,6 @@ ZIP_TEMPLATE_BRANCH=oos;
 BUILD_TIMESTAMP=$( date '+%Y%m%d' );
 BUILD_REVISION=$( git rev-parse HEAD | cut -c -7 );
 PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip
-
-
-# # # SCRIPT INIT # # #
-
-tput reset;
-cd ../$PRODUCT_DEVICE || cd ../*$PRODUCT_DEVICE_ALIAS || exit 1;
 
 
 # # # SET LOCAL VARIABLES # # #
