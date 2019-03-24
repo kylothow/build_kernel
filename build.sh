@@ -42,7 +42,7 @@ ZIP_TEMPLATE_BRANCH=oos;
 
 BUILD_TIMESTAMP=$( date '+%Y%m%d' );
 BUILD_REVISION=$( git rev-parse HEAD | cut -c -7 );
-PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip
+PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
 
 
 # # # SET LOCAL VARIABLES # # #
@@ -88,21 +88,24 @@ if [ ! -d "$BUILD_DIR_OUT" ]; then
   mkdir $BUILD_DIR_OUT;
 fi;
 
+
 # # # VERIFY TOOLCHAIN PRESENCE # # #
 
 FUNC_VERIFY_TOOLCHAIN()
 {
-  if [ ! -d "$CROSS_COMPILE_PATH" ]; then
-    git clone $CROSS_COMPILE_REPO $CROSS_COMPILE_PATH \
-        -b $CROSS_COMPILE_BRANCH;
-  else
-    cd $CROSS_COMPILE_PATH;
-    git fetch;
-    git checkout $CROSS_COMPILE_BRANCH;
-    git pull;
-    cd $BUILD_DIR;
+  if [ "$BUILD_HOST_ARCH" == "x86_64" ] && [ "$USE_CROSS_COMPILE_REPO" == true ]; then
+    if [ ! -d "$CROSS_COMPILE_PATH" ]; then
+      git clone $CROSS_COMPILE_REPO $CROSS_COMPILE_PATH \
+          -b $CROSS_COMPILE_BRANCH;
+    else
+      cd $CROSS_COMPILE_PATH;
+      git fetch;
+      git checkout $CROSS_COMPILE_BRANCH;
+      git pull;
+      cd $BUILD_DIR;
+    fi;
+    echo "";
   fi;
-  echo "";
 }
 
 
@@ -170,11 +173,13 @@ FUNC_STRIP_MODULES()
 
 FUNC_SIGN_MODULES()
 {
-  find $BUILD_DIR_OUT_OBJ \
-      -name "*.ko" \
-      -exec $BUILD_DIR_OUT_OBJ/scripts/sign-file sha512 \
-            $BUILD_DIR_OUT_OBJ/certs/signing_key.pem \
-            $BUILD_DIR_OUT_OBJ/certs/signing_key.x509 {} \;
+  if [ -f "$BUILD_DIR_OUT_OBJ/certs/signing_key.pem" ]; then
+    find $BUILD_DIR_OUT_OBJ \
+        -name "*.ko" \
+        -exec $BUILD_DIR_OUT_OBJ/scripts/sign-file sha512 \
+              $BUILD_DIR_OUT_OBJ/certs/signing_key.pem \
+              $BUILD_DIR_OUT_OBJ/certs/signing_key.x509 {} \;
+  fi;
 }
 
 
@@ -186,9 +191,9 @@ FUNC_COPY_KERNEL()
   echo "";
 
   MAKEFILE=$BUILD_DIR/Makefile;
-  MAKEFILE_VERSION=$( grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE )
-  MAKEFILE_PATCHLEVEL=$( grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE )
-  MAKEFILE_SUBLEVEL=$( grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE )
+  MAKEFILE_VERSION=$( grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE );
+  MAKEFILE_PATCHLEVEL=$( grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE );
+  MAKEFILE_SUBLEVEL=$( grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE );
 
   LINUX_VERSION=$MAKEFILE_VERSION.$MAKEFILE_PATCHLEVEL.$MAKEFILE_SUBLEVEL;
 
@@ -239,9 +244,7 @@ FUNC_BUILD_ZIP()
 
 rm -f $BUILD_DIR_OUT/build.log;
 (
-  if [ "$BUILD_HOST_ARCH" == "x86_64" ] && [ "$USE_CROSS_COMPILE_REPO" == true ]; then
-    FUNC_VERIFY_TOOLCHAIN;
-  fi;
+  FUNC_VERIFY_TOOLCHAIN;
   FUNC_VERIFY_TEMPLATE;
   FUNC_CLEAN;
   FUNC_BUILD;
