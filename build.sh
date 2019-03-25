@@ -21,28 +21,25 @@ PRODUCT_DEVICE=oneplus5;
 PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
 
 
-# # # SCRIPT INIT # # #
-
-tput reset;
-cd ../$PRODUCT_DEVICE || cd ../*$PRODUCT_DEVICE_ALIAS || exit 1;
-
-
 # # # SET TOOLS PARAMETERS # # #
 
 USE_CCACHE=true;
+
 USE_CROSS_COMPILE_REPO=true;
 
-CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9;
-CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
 CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
 CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
+CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
+CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
 
 ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel2.git;
 ZIP_TEMPLATE_BRANCH=oos;
 
-BUILD_TIMESTAMP=$( date '+%Y%m%d' );
-BUILD_REVISION=$( git rev-parse HEAD | cut -c -7 );
-PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
+
+# # # SCRIPT INIT # # #
+
+tput reset;
+cd ../$PRODUCT_DEVICE || cd ../*$PRODUCT_DEVICE_ALIAS || exit 1;
 
 
 # # # SET LOCAL VARIABLES # # #
@@ -54,21 +51,31 @@ BUILD_DIR_OUT=$BUILD_DIR_ROOT/${BUILD_DIR_NAME}_out;
 BUILD_DIR_OUT_OBJ=$BUILD_DIR_OUT/KERNEL_OBJ;
 BUILD_DIR_ZIP_TEMPLATE=$BUILD_DIR_OUT/template;
 
+KERNEL_IMG=$BUILD_DIR_ZIP_TEMPLATE/Image.gz-dtb;
+KERNEL_MOD_SYSTEM=$BUILD_DIR_ZIP_TEMPLATE/modules/system/lib/modules;
+KERNEL_MOD_VENDOR=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
+
+BUILD_TIMESTAMP=$( date '+%Y%m%d' );
+BUILD_REVISION=$( git rev-parse HEAD | cut -c -7 );
+PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
+
 if [ -f "$BUILD_DIR/arch/arm64/configs/${PRODUCT_DEVICE}_defconfig" ]; then
   KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
 else
   KERNEL_DEFCONFIG=msmcortex-perf_defconfig;
 fi;
 
-KERNEL_IMG=$BUILD_DIR_ZIP_TEMPLATE/Image.gz-dtb;
-SYSTEM_MODULES=$BUILD_DIR_ZIP_TEMPLATE/modules/system/lib/modules;
-VENDOR_MODULES=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
-
-BUILD_JOB_NUMBER=$( nproc --all );
-BUILD_HOST_ARCH=$( uname -m );
 BUILD_USERNAME=$( whoami );
-
 CROSS_COMPILE_PATH=/home/$BUILD_USERNAME/source/CodeAurora/$CROSS_COMPILE_NAME;
+
+BUILD_HOST_ARCH=$( uname -m );
+BUILD_JOB_NUMBER=$( nproc --all );
+
+MAKEFILE=$BUILD_DIR/Makefile;
+MAKEFILE_VERSION=$( grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE );
+MAKEFILE_PATCHLEVEL=$( grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE );
+MAKEFILE_SUBLEVEL=$( grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE );
+MAKEFILE_LINUX_VERSION=$MAKEFILE_VERSION.$MAKEFILE_PATCHLEVEL.$MAKEFILE_SUBLEVEL;
 
 
 # # # SET GLOBAL VARIABLES # # #
@@ -133,8 +140,8 @@ FUNC_CLEAN()
 {
   rm -rf $BUILD_DIR_OUT_OBJ;
   rm -f $KERNEL_IMG;
-  rm -f $SYSTEM_MODULES/*.ko;
-  rm -f $VENDOR_MODULES/*.ko;
+  rm -f $KERNEL_MOD_SYSTEM/*.ko;
+  rm -f $KERNEL_MOD_VENDOR/*.ko;
   rm -f $BUILD_DIR_ZIP_TEMPLATE/version;
   rm -f $BUILD_DIR_OUT/*.zip;
 }
@@ -188,35 +195,28 @@ FUNC_SIGN_MODULES()
 FUNC_COPY_KERNEL()
 {
   cp -v $BUILD_DIR_OUT_OBJ/arch/arm64/boot/Image.gz-dtb $KERNEL_IMG;
+  echo "Version: $MAKEFILE_LINUX_VERSION-perf~$PRODUCT_NAME-$BUILD_REVISION" > $BUILD_DIR_ZIP_TEMPLATE/version;
+
   echo "";
-
-  MAKEFILE=$BUILD_DIR/Makefile;
-  MAKEFILE_VERSION=$( grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE );
-  MAKEFILE_PATCHLEVEL=$( grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE );
-  MAKEFILE_SUBLEVEL=$( grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE );
-
-  LINUX_VERSION=$MAKEFILE_VERSION.$MAKEFILE_PATCHLEVEL.$MAKEFILE_SUBLEVEL;
-
-  echo "Version: $LINUX_VERSION-perf~$PRODUCT_NAME-$BUILD_REVISION" > $BUILD_DIR_ZIP_TEMPLATE/version;
 }
 
 FUNC_COPY_MODULES()
 {
   find $BUILD_DIR_OUT_OBJ \
       -name "*.ko" \
-      -exec cp -v {} $SYSTEM_MODULES \;
+      -exec cp -v {} $KERNEL_MOD_SYSTEM \;
 
-  if [ ! -d "$VENDOR_MODULES" ]; then
-    mkdir -p $VENDOR_MODULES;
+  if [ ! -d "$KERNEL_MOD_VENDOR" ]; then
+    mkdir -p $KERNEL_MOD_VENDOR;
   fi;
 
-  if [ -f "$SYSTEM_MODULES/wlan.ko" ]; then
-    mv -v $SYSTEM_MODULES/wlan.ko $SYSTEM_MODULES/qca_cld3_wlan.ko;
-    cp -v $SYSTEM_MODULES/qca_cld3_wlan.ko $VENDOR_MODULES/qca_cld3_wlan.ko;
+  if [ -f "$KERNEL_MOD_SYSTEM/wlan.ko" ]; then
+    mv -v $KERNEL_MOD_SYSTEM/wlan.ko $KERNEL_MOD_SYSTEM/qca_cld3_wlan.ko;
+    cp -v $KERNEL_MOD_SYSTEM/qca_cld3_wlan.ko $KERNEL_MOD_VENDOR/qca_cld3_wlan.ko;
   fi;
-  if [ -f "$SYSTEM_MODULES/msm_11ad_proxy.ko" ] && [ -f "$SYSTEM_MODULES/wil6210.ko" ]; then
-    cp -v $SYSTEM_MODULES/msm_11ad_proxy.ko $VENDOR_MODULES/msm_11ad_proxy.ko;
-    cp -v $SYSTEM_MODULES/wil6210.ko $VENDOR_MODULES/wil6210.ko;
+  if [ -f "$KERNEL_MOD_SYSTEM/msm_11ad_proxy.ko" ] && [ -f "$KERNEL_MOD_SYSTEM/wil6210.ko" ]; then
+    cp -v $KERNEL_MOD_SYSTEM/msm_11ad_proxy.ko $KERNEL_MOD_VENDOR/msm_11ad_proxy.ko;
+    cp -v $KERNEL_MOD_SYSTEM/wil6210.ko $KERNEL_MOD_VENDOR/wil6210.ko;
   fi;
 
   echo "";
