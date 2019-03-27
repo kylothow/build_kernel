@@ -25,12 +25,17 @@ PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
 
 USE_CCACHE=true;
 
-USE_CROSS_COMPILE_REPO=true;
+USE_CROSS_COMPILE_REPO=false;
 
-CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
-CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
-CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
-CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
+if [ "$USE_CROSS_COMPILE_REPO" == true ]; then
+  CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
+  CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
+  CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
+  CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
+else
+  CROSS_COMPILE_NAME=gcc-arm-8.3-2019.02-x86_64-aarch64-linux-gnu;
+  CROSS_COMPILE_SUFFIX=aarch64-linux-gnu-;
+fi;
 
 ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel2.git;
 ZIP_TEMPLATE_BRANCH=oos;
@@ -58,6 +63,7 @@ KERNEL_MOD_VENDOR=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
 BUILD_TIMESTAMP=$( date '+%Y%m%d' );
 BUILD_REVISION=$( git rev-parse HEAD | cut -c -7 );
 PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
+PACKAGE_PATH=$BUILD_DIR_OUT/$PACKAGE_NAME;
 
 if [ -f "$BUILD_DIR/arch/arm64/configs/${PRODUCT_DEVICE}_defconfig" ]; then
   KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
@@ -65,8 +71,7 @@ else
   KERNEL_DEFCONFIG=msmcortex-perf_defconfig;
 fi;
 
-BUILD_USERNAME=$( whoami );
-CROSS_COMPILE_PATH=/home/$BUILD_USERNAME/source/CodeAurora/$CROSS_COMPILE_NAME;
+CROSS_COMPILE_PATH=$BUILD_DIR_ROOT/gcc/$CROSS_COMPILE_NAME;
 
 BUILD_HOST_ARCH=$( uname -m );
 BUILD_JOB_NUMBER=$( nproc --all );
@@ -227,8 +232,6 @@ FUNC_COPY_MODULES()
 
 FUNC_BUILD_ZIP()
 {
-  PACKAGE_PATH=$BUILD_DIR_OUT/$PACKAGE_NAME;
-
   cd $BUILD_DIR_ZIP_TEMPLATE;
   zip -r9 $PACKAGE_PATH * \
       -x patch/ prebuilt/ ramdisk/ README.md *.placeholder;
