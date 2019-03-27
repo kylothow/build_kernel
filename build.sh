@@ -25,7 +25,7 @@ PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
 
 USE_CCACHE=true;
 
-USE_CROSS_COMPILE_REPO=false;
+USE_CROSS_COMPILE_REPO=true;
 
 if [ "$USE_CROSS_COMPILE_REPO" == true ]; then
   CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
