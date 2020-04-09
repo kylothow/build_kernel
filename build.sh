@@ -16,7 +16,7 @@
 
 # # # SET KERNEL ID # # #
 
-PRODUCT_NAME=DarkDescent;
+PRODUCT_NAME=glowing_potato;
 PRODUCT_DEVICE=oneplus5;
 PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
 
@@ -44,7 +44,10 @@ ZIP_TEMPLATE_BRANCH=oos;
 # # # SCRIPT INIT # # #
 
 tput reset;
-cd ../$PRODUCT_DEVICE || cd ../*$PRODUCT_DEVICE_ALIAS || exit 1;
+
+cd ../$PRODUCT_DEVICE 2>/dev/null || \
+    cd ../*$PRODUCT_DEVICE_ALIAS 2>/dev/null || \
+    cd ../$PRODUCT_NAME 2>/dev/null || exit 1;
 
 
 # # # SET LOCAL VARIABLES # # #
