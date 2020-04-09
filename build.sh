@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2018-2019 Michele Beccalossi <beccalossi.michele@gmail.com>
+# Copyright (C) 2018-2020 Michele Beccalossi <beccalossi.michele@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,9 +49,9 @@ cd ../$PRODUCT_DEVICE || cd ../*$PRODUCT_DEVICE_ALIAS || exit 1;
 
 # # # SET LOCAL VARIABLES # # #
 
-BUILD_DIR=$( pwd );
-BUILD_DIR_NAME=$( basename $BUILD_DIR );
-BUILD_DIR_ROOT=$( dirname $BUILD_DIR );
+BUILD_DIR=$(pwd);
+BUILD_DIR_NAME=$(basename $BUILD_DIR);
+BUILD_DIR_ROOT=$(dirname $BUILD_DIR);
 BUILD_DIR_OUT=$BUILD_DIR_ROOT/${BUILD_DIR_NAME}_out;
 BUILD_DIR_OUT_OBJ=$BUILD_DIR_OUT/KERNEL_OBJ;
 BUILD_DIR_ZIP_TEMPLATE=$BUILD_DIR_OUT/template;
@@ -60,8 +60,8 @@ KERNEL_IMG=$BUILD_DIR_ZIP_TEMPLATE/Image.gz-dtb;
 KERNEL_MOD_SYSTEM=$BUILD_DIR_ZIP_TEMPLATE/modules/system/lib/modules;
 KERNEL_MOD_VENDOR=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
 
-BUILD_TIMESTAMP=$( date '+%Y%m%d' );
-BUILD_REVISION=$( git rev-parse HEAD | cut -c -7 );
+BUILD_TIMESTAMP=$(date '+%Y%m%d');
+BUILD_REVISION=$(git rev-parse HEAD | cut -c -7);
 PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
 PACKAGE_PATH=$BUILD_DIR_OUT/$PACKAGE_NAME;
 
@@ -73,13 +73,13 @@ fi;
 
 CROSS_COMPILE_PATH=$BUILD_DIR_ROOT/gcc/$CROSS_COMPILE_NAME;
 
-BUILD_HOST_ARCH=$( uname -m );
-BUILD_JOB_NUMBER=$( nproc --all );
+BUILD_HOST_ARCH=$(uname -m);
+BUILD_JOB_NUMBER=$(nproc --all);
 
 MAKEFILE=$BUILD_DIR/Makefile;
-MAKEFILE_VERSION=$( grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE );
-MAKEFILE_PATCHLEVEL=$( grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE );
-MAKEFILE_SUBLEVEL=$( grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE );
+MAKEFILE_VERSION=$(grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE);
+MAKEFILE_PATCHLEVEL=$(grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE);
+MAKEFILE_SUBLEVEL=$(grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE);
 MAKEFILE_LINUX_VERSION=$MAKEFILE_VERSION.$MAKEFILE_PATCHLEVEL.$MAKEFILE_SUBLEVEL;
 
 
@@ -103,8 +103,7 @@ fi;
 
 # # # VERIFY TOOLCHAIN PRESENCE # # #
 
-FUNC_VERIFY_TOOLCHAIN()
-{
+func_verify_toolchain() {
   if [ "$BUILD_HOST_ARCH" == "x86_64" ] && [ "$USE_CROSS_COMPILE_REPO" == true ]; then
     if [ ! -d "$CROSS_COMPILE_PATH" ]; then
       git clone $CROSS_COMPILE_REPO $CROSS_COMPILE_PATH \
@@ -123,8 +122,7 @@ FUNC_VERIFY_TOOLCHAIN()
 
 # # # VERIFY ZIP TEMPLATE PRESENCE # # #
 
-FUNC_VERIFY_TEMPLATE()
-{
+func_verify_template() {
   if [ ! -d "$BUILD_DIR_ZIP_TEMPLATE" ]; then
     git clone $ZIP_TEMPLATE_REPO $BUILD_DIR_ZIP_TEMPLATE \
         -b $ZIP_TEMPLATE_BRANCH;
@@ -141,8 +139,7 @@ FUNC_VERIFY_TEMPLATE()
 
 # # # CLEAN BUILD OUTPUT # # #
 
-FUNC_CLEAN()
-{
+func_clean() {
   rm -rf $BUILD_DIR_OUT_OBJ;
   rm -f $KERNEL_IMG;
   rm -f $KERNEL_MOD_SYSTEM/*.ko;
@@ -154,8 +151,7 @@ FUNC_CLEAN()
 
 # # # BUILD CONFIG AND KERNEL # # #
 
-FUNC_BUILD()
-{
+func_build() {
   mkdir $BUILD_DIR_OUT_OBJ;
 
   make O=$BUILD_DIR_OUT_OBJ $KERNEL_DEFCONFIG;
@@ -173,8 +169,7 @@ FUNC_BUILD()
 
 # # # STRIP MODULES # # #
 
-FUNC_STRIP_MODULES()
-{
+func_strip_modules() {
   find $BUILD_DIR_OUT_OBJ \
       -name "*.ko" \
       -exec ${CROSS_COMPILE}strip --strip-debug --strip-unneeded {} \;
@@ -183,8 +178,7 @@ FUNC_STRIP_MODULES()
 
 # # # SIGN MODULES # # #
 
-FUNC_SIGN_MODULES()
-{
+func_sign_modules() {
   if [ -f "$BUILD_DIR_OUT_OBJ/certs/signing_key.pem" ]; then
     find $BUILD_DIR_OUT_OBJ \
         -name "*.ko" \
@@ -197,16 +191,14 @@ FUNC_SIGN_MODULES()
 
 # # # COPY BUILD OUTPUT # # #
 
-FUNC_COPY_KERNEL()
-{
+func_copy_kernel() {
   cp -v $BUILD_DIR_OUT_OBJ/arch/arm64/boot/Image.gz-dtb $KERNEL_IMG;
   echo "Version: $MAKEFILE_LINUX_VERSION-perf~$PRODUCT_NAME-$BUILD_REVISION" > $BUILD_DIR_ZIP_TEMPLATE/version;
 
   echo "";
 }
 
-FUNC_COPY_MODULES()
-{
+func_copy_modules() {
   find $BUILD_DIR_OUT_OBJ \
       -name "*.ko" \
       -exec cp -v {} $KERNEL_MOD_SYSTEM \;
@@ -230,8 +222,7 @@ FUNC_COPY_MODULES()
 
 # # # BUILD ZIP # # #
 
-FUNC_BUILD_ZIP()
-{
+func_build_zip() {
   cd $BUILD_DIR_ZIP_TEMPLATE;
   zip -r9 $PACKAGE_PATH * \
       -x patch/ prebuilt/ ramdisk/ README.md *.placeholder;
@@ -247,13 +238,13 @@ FUNC_BUILD_ZIP()
 
 rm -f $BUILD_DIR_OUT/build.log;
 (
-  FUNC_VERIFY_TOOLCHAIN;
-  FUNC_VERIFY_TEMPLATE;
-  FUNC_CLEAN;
-  FUNC_BUILD;
-  FUNC_COPY_KERNEL;
-  FUNC_STRIP_MODULES;
-  FUNC_SIGN_MODULES;
-  FUNC_COPY_MODULES;
-  FUNC_BUILD_ZIP;
+  func_verify_toolchain;
+  func_verify_template;
+  func_clean;
+  func_build;
+  func_copy_kernel;
+  func_strip_modules;
+  func_sign_modules;
+  func_copy_modules;
+  func_build_zip;
 ) 2>&1 | tee $BUILD_DIR_OUT/build.log;
