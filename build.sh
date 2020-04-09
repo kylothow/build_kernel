@@ -37,8 +37,8 @@ else
   CROSS_COMPILE_SUFFIX=aarch64-linux-gnu-;
 fi;
 
-ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel2.git;
-ZIP_TEMPLATE_BRANCH=oos;
+ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel3.git;
+ZIP_TEMPLATE_BRANCH=android-9;
 
 
 # # # SCRIPT INIT # # #
@@ -228,7 +228,7 @@ func_copy_modules() {
 func_build_zip() {
   cd $BUILD_DIR_ZIP_TEMPLATE;
   zip -r9 $PACKAGE_PATH * \
-      -x patch/ prebuilt/ ramdisk/ README.md *.placeholder;
+      -x .git README.md *placeholder patch/ ramdisk/;
   cd $BUILD_DIR;
 
   echo "";
