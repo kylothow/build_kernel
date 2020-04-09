@@ -27,14 +27,11 @@ USE_CCACHE=true;
 
 USE_CROSS_COMPILE_REPO=true;
 
+CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
+CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
 if [ "$USE_CROSS_COMPILE_REPO" == true ]; then
-  CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
-  CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
   CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
   CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
-else
-  CROSS_COMPILE_NAME=gcc-arm-8.3-2019.02-x86_64-aarch64-linux-gnu;
-  CROSS_COMPILE_SUFFIX=aarch64-linux-gnu-;
 fi;
 
 ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel3.git;
