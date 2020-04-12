@@ -24,16 +24,15 @@ PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
 # # # SET TOOLS PARAMETERS # # #
 
 USE_CCACHE=true;
-
 USE_CROSS_COMPILE_REPO=true;
 
 CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
 CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
+
 if [ "$USE_CROSS_COMPILE_REPO" == true ]; then
   CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
   CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
 fi;
-
 ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel3.git;
 ZIP_TEMPLATE_BRANCH=android-9;
 
@@ -54,14 +53,17 @@ BUILD_DIR_NAME=$(basename $BUILD_DIR);
 BUILD_DIR_ROOT=$(dirname $BUILD_DIR);
 BUILD_DIR_OUT=$BUILD_DIR_ROOT/${BUILD_DIR_NAME}_out;
 BUILD_DIR_OUT_OBJ=$BUILD_DIR_OUT/KERNEL_OBJ;
-BUILD_DIR_ZIP_TEMPLATE=$BUILD_DIR_OUT/template;
+BUILD_DIR_ZIP_TEMPLATE=$BUILD_DIR_OUT/AnyKernel3;
 
 KERNEL_IMG=$BUILD_DIR_ZIP_TEMPLATE/Image.gz-dtb;
 KERNEL_MOD_SYSTEM=$BUILD_DIR_ZIP_TEMPLATE/modules/system/lib/modules;
 KERNEL_MOD_VENDOR=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
 
-BUILD_TIMESTAMP=$(date '+%Y%m%d');
+BUILD_HOST_ARCH=$(uname -m);
+BUILD_JOB_NUMBER=$(nproc --all);
 BUILD_REVISION=$(git rev-parse HEAD | cut -c -7);
+BUILD_TIMESTAMP=$(date '+%Y%m%d');
+
 PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
 PACKAGE_PATH=$BUILD_DIR_OUT/$PACKAGE_NAME;
 
@@ -72,9 +74,6 @@ else
 fi;
 
 CROSS_COMPILE_PATH=$BUILD_DIR_ROOT/gcc/$CROSS_COMPILE_NAME;
-
-BUILD_HOST_ARCH=$(uname -m);
-BUILD_JOB_NUMBER=$(nproc --all);
 
 MAKEFILE=$BUILD_DIR/Makefile;
 MAKEFILE_VERSION=$(grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE);
