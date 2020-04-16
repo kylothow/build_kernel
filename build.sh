@@ -14,11 +14,11 @@
 #
 
 
-# # # SET KERNEL ID # # #
+# # # SET DEVICE AND KERNEL NAME # # #
 
-PRODUCT_NAME=glowing_potato;
 PRODUCT_DEVICE=oneplus5;
 PRODUCT_DEVICE_ALIAS=oneplus_msm8998;
+PRODUCT_NAME=glowing_potato;
 
 
 # # # SET TOOLS PARAMETERS # # #
@@ -28,7 +28,6 @@ USE_CROSS_COMPILE_REPO=true;
 
 CROSS_COMPILE_NAME=aarch64-linux-android-4.9;
 CROSS_COMPILE_SUFFIX=aarch64-linux-android-;
-
 if [ "$USE_CROSS_COMPILE_REPO" == true ]; then
   CROSS_COMPILE_REPO=https://source.codeaurora.org/quic/la/platform/prebuilts/gcc/linux-x86/aarch64/$CROSS_COMPILE_NAME;
   CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release;
@@ -51,56 +50,45 @@ cd ../$PRODUCT_DEVICE 2>/dev/null || \
 BUILD_DIR=$(pwd);
 BUILD_DIR_NAME=$(basename $BUILD_DIR);
 BUILD_DIR_ROOT=$(dirname $BUILD_DIR);
-BUILD_DIR_OUT=$BUILD_DIR_ROOT/${BUILD_DIR_NAME}_out;
-BUILD_DIR_OUT_OBJ=$BUILD_DIR_OUT/KERNEL_OBJ;
-BUILD_DIR_ZIP_TEMPLATE=$BUILD_DIR_OUT/AnyKernel3;
-
-KERNEL_IMG=$BUILD_DIR_ZIP_TEMPLATE/Image.gz-dtb;
-KERNEL_MOD_SYSTEM=$BUILD_DIR_ZIP_TEMPLATE/modules/system/lib/modules;
-KERNEL_MOD_VENDOR=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
 
 BUILD_HOST_ARCH=$(uname -m);
 BUILD_JOB_NUMBER=$(nproc --all);
+CROSS_COMPILE_PATH=$BUILD_DIR_ROOT/gcc/$CROSS_COMPILE_NAME;
+
 BUILD_REVISION=$(git rev-parse HEAD | cut -c -7);
 BUILD_TIMESTAMP=$(date '+%Y%m%d');
 
-PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
-PACKAGE_PATH=$BUILD_DIR_OUT/$PACKAGE_NAME;
-
+MAKEFILE=$BUILD_DIR/Makefile;
+MAKEFILE_VERSION=$(grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE);
+MAKEFILE_PATCHLEVEL=$(grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE);
+MAKEFILE_SUBLEVEL=$(grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE);
+LINUX_VERSION=$MAKEFILE_VERSION.$MAKEFILE_PATCHLEVEL.$MAKEFILE_SUBLEVEL;
 if [ -f "$BUILD_DIR/arch/arm64/configs/${PRODUCT_DEVICE}_defconfig" ]; then
   KERNEL_DEFCONFIG=${PRODUCT_DEVICE}_defconfig;
 else
   KERNEL_DEFCONFIG=msmcortex-perf_defconfig;
 fi;
 
-CROSS_COMPILE_PATH=$BUILD_DIR_ROOT/gcc/$CROSS_COMPILE_NAME;
-
-MAKEFILE=$BUILD_DIR/Makefile;
-MAKEFILE_VERSION=$(grep -Po -m 1 '(?<=VERSION = ).*' $MAKEFILE);
-MAKEFILE_PATCHLEVEL=$(grep -Po -m 1 '(?<=PATCHLEVEL = ).*' $MAKEFILE);
-MAKEFILE_SUBLEVEL=$(grep -Po -m 1 '(?<=SUBLEVEL = ).*' $MAKEFILE);
-MAKEFILE_LINUX_VERSION=$MAKEFILE_VERSION.$MAKEFILE_PATCHLEVEL.$MAKEFILE_SUBLEVEL;
+BUILD_DIR_OUT=$BUILD_DIR_ROOT/${BUILD_DIR_NAME}_out;
+BUILD_DIR_OUT_OBJ=$BUILD_DIR_OUT/KERNEL_OBJ;
+BUILD_DIR_ZIP_TEMPLATE=$BUILD_DIR_OUT/AnyKernel3;
+KERNEL_IMG=$BUILD_DIR_ZIP_TEMPLATE/Image.gz-dtb;
+KERNEL_MOD_SYSTEM=$BUILD_DIR_ZIP_TEMPLATE/modules/system/lib/modules;
+KERNEL_MOD_VENDOR=$BUILD_DIR_ZIP_TEMPLATE/modules/vendor/lib/modules;
+PACKAGE_NAME=$PRODUCT_NAME-$PRODUCT_DEVICE-$BUILD_TIMESTAMP-$BUILD_REVISION.zip;
+PACKAGE_PATH=$BUILD_DIR_OUT/$PACKAGE_NAME;
 
 
 # # # SET GLOBAL VARIABLES # # #
 
 export ARCH=arm64;
-
 if [ "$BUILD_HOST_ARCH" == "x86_64" ]; then
   export CROSS_COMPILE=$CROSS_COMPILE_PATH/bin/$CROSS_COMPILE_SUFFIX;
 fi;
-
 export LOCALVERSION=~$PRODUCT_NAME-$BUILD_REVISION;
 
 
-# # # VERIFY PRODUCT OUTPUT FOLDER EXISTENCE # # #
-
-if [ ! -d "$BUILD_DIR_OUT" ]; then
-  mkdir $BUILD_DIR_OUT;
-fi;
-
-
-# # # VERIFY TOOLCHAIN PRESENCE # # #
+# # # FUNCTIONS # # #
 
 func_verify_toolchain() {
   if [ "$BUILD_HOST_ARCH" == "x86_64" ] && [ "$USE_CROSS_COMPILE_REPO" == true ]; then
@@ -118,9 +106,6 @@ func_verify_toolchain() {
   fi;
 }
 
-
-# # # VERIFY ZIP TEMPLATE PRESENCE # # #
-
 func_verify_template() {
   if [ ! -d "$BUILD_DIR_ZIP_TEMPLATE" ]; then
     git clone $ZIP_TEMPLATE_REPO $BUILD_DIR_ZIP_TEMPLATE \
@@ -135,9 +120,6 @@ func_verify_template() {
   echo "";
 }
 
-
-# # # CLEAN BUILD OUTPUT # # #
-
 func_clean() {
   rm -rf $BUILD_DIR_OUT_OBJ;
   rm -f $KERNEL_IMG;
@@ -146,9 +128,6 @@ func_clean() {
   rm -f $BUILD_DIR_ZIP_TEMPLATE/version;
   rm -f $BUILD_DIR_OUT/*.zip;
 }
-
-
-# # # BUILD CONFIG AND KERNEL # # #
 
 func_build() {
   mkdir $BUILD_DIR_OUT_OBJ;
@@ -165,17 +144,11 @@ func_build() {
   echo "";
 }
 
-
-# # # STRIP MODULES # # #
-
 func_strip_modules() {
   find $BUILD_DIR_OUT_OBJ \
       -name "*.ko" \
       -exec ${CROSS_COMPILE}strip --strip-debug --strip-unneeded {} \;
 }
-
-
-# # # SIGN MODULES # # #
 
 func_sign_modules() {
   if [ -f "$BUILD_DIR_OUT_OBJ/certs/signing_key.pem" ]; then
@@ -187,12 +160,10 @@ func_sign_modules() {
   fi;
 }
 
-
-# # # COPY BUILD OUTPUT # # #
-
 func_copy_kernel() {
   cp -v $BUILD_DIR_OUT_OBJ/arch/arm64/boot/Image.gz-dtb $KERNEL_IMG;
-  echo "Version: $MAKEFILE_LINUX_VERSION-perf~$PRODUCT_NAME-$BUILD_REVISION" > $BUILD_DIR_ZIP_TEMPLATE/version;
+
+  echo "Version: $LINUX_VERSION-perf~$PRODUCT_NAME-$BUILD_REVISION" > $BUILD_DIR_ZIP_TEMPLATE/version;
 
   echo "";
 }
@@ -201,11 +172,9 @@ func_copy_modules() {
   find $BUILD_DIR_OUT_OBJ \
       -name "*.ko" \
       -exec cp -v {} $KERNEL_MOD_SYSTEM \;
-
   if [ ! -d "$KERNEL_MOD_VENDOR" ]; then
     mkdir -p $KERNEL_MOD_VENDOR;
   fi;
-
   if [ -f "$KERNEL_MOD_SYSTEM/wlan.ko" ]; then
     mv -v $KERNEL_MOD_SYSTEM/wlan.ko $KERNEL_MOD_SYSTEM/qca_cld3_wlan.ko;
     cp -v $KERNEL_MOD_SYSTEM/qca_cld3_wlan.ko $KERNEL_MOD_VENDOR/qca_cld3_wlan.ko;
@@ -214,12 +183,8 @@ func_copy_modules() {
     cp -v $KERNEL_MOD_SYSTEM/msm_11ad_proxy.ko $KERNEL_MOD_VENDOR/msm_11ad_proxy.ko;
     cp -v $KERNEL_MOD_SYSTEM/wil6210.ko $KERNEL_MOD_VENDOR/wil6210.ko;
   fi;
-
   echo "";
 }
-
-
-# # # BUILD ZIP # # #
 
 func_build_zip() {
   cd $BUILD_DIR_ZIP_TEMPLATE;
@@ -234,6 +199,10 @@ func_build_zip() {
 
 
 # # # MAIN FUNCTION # # #
+
+if [ ! -d "$BUILD_DIR_OUT" ]; then
+  mkdir $BUILD_DIR_OUT;
+fi;
 
 rm -f $BUILD_DIR_OUT/build.log;
 (
