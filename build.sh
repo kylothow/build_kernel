@@ -205,7 +205,6 @@ if [ ! -d "${BUILD_DIR_OUT}" ]; then
   mkdir ${BUILD_DIR_OUT}
 fi
 
-rm -f ${BUILD_DIR_OUT}/build.log
 (
   verify_toolchain
   verify_template
