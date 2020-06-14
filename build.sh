@@ -34,7 +34,7 @@ if [ "${USE_CROSS_COMPILE_REPO}" == true ]; then
   CROSS_COMPILE_BRANCH=keystone/p-keystone-qcom-release
 fi
 ZIP_TEMPLATE_REPO=https://github.com/kylothow/AnyKernel3.git
-ZIP_TEMPLATE_BRANCH=android-9
+ZIP_TEMPLATE_BRANCH=android-10
 
 
 # # # SCRIPT INIT # # #
