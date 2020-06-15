@@ -194,7 +194,7 @@ function build_zip() {
   cd ${BUILD_DIR}
 
   echo ""
-  echo "out: ${PACKAGE_NAME}"
+  echo "out: ${PACKAGE_PATH}"
   echo ""
 }
 
