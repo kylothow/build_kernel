@@ -100,7 +100,7 @@ function verify_gcc() {
       cd ${GCC_DIR}
       git fetch
       git checkout ${GCC_BRANCH}
-      git pull
+      git pull --ff-only
       cd ${KERNEL_SRC_DIR}
     fi
     echo ""
