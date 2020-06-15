@@ -76,7 +76,7 @@ TEMPLATE_SRC_DIR=${OUT_DIR}/AnyKernel3
 KERNEL_IMG=${TEMPLATE_SRC_DIR}/Image.gz-dtb
 SYSTEM_MOD_DIR=${TEMPLATE_SRC_DIR}/modules/system/lib/modules
 VENDOR_MOD_DIR=${TEMPLATE_SRC_DIR}/modules/vendor/lib/modules
-PACKAGE_NAME=${PROJECT_NAME}-${DEVICE_NAME}-${BUILD_TIMESTAMP}-${BUILD_REVISION}.zip
+PACKAGE_NAME=${PROJECT_NAME}-${DEVICE_NAME}-${TEMPLATE_BRANCH//-}-${BUILD_TIMESTAMP}-${BUILD_REVISION}.zip
 PACKAGE_ZIP=${OUT_DIR}/${PACKAGE_NAME}
 
 
@@ -164,7 +164,7 @@ function sign_modules() {
 function copy_image() {
   cp -v ${KERNEL_OUT_DIR}/arch/arm64/boot/Image.gz-dtb ${KERNEL_IMG}
 
-  echo "Version: ${LINUX_VERSION}-perf~${PROJECT_NAME}-${BUILD_REVISION}" > ${TEMPLATE_SRC_DIR}/version
+  echo "Version: ${LINUX_VERSION}-perf~${PROJECT_NAME}-${TEMPLATE_BRANCH//-}-${BUILD_REVISION}" > ${TEMPLATE_SRC_DIR}/version
 
   echo ""
 }
