@@ -34,7 +34,7 @@ if [ "${USE_GCC_REMOTE}" == true ]; then
   GCC_BRANCH=keystone/p-keystone-qcom-release
 fi
 TEMPLATE_REMOTE=https://github.com/kylothow/AnyKernel3.git
-TEMPLATE_BRANCH=android-10
+TEMPLATE_BRANCH=android-9
 
 
 # # # SCRIPT INIT # # #
